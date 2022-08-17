@@ -3,6 +3,7 @@ import click
 import logging
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
+import numpy as np
 import geopandas as gpd
 
 
@@ -29,6 +30,13 @@ def main(input_filepath, output_filepath):
     assert data.crs == old_areas.crs == "epsg:3067"
 
     data['is_old'] = data.geometry.within(old_areas.unary_union)
+    data.rename(columns={
+        'lutheran_density': 'lutheran',
+        'orthodox_density': 'orthodox',
+    }, inplace=True)
+    data['total_income_ln'] = data.total_income.apply(np.log)
+    data.loc[np.isneginf(data.total_income_ln), 'total_income_ln'] = None
+    logger.info('total_income_ln created')
 
     logger.info(f'Saving data to {plot_output_fp}')
     data.to_file(plot_output_fp)

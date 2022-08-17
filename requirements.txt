@@ -45,6 +45,7 @@ flake8==5.0.4
 folium @ file:///home/conda/feedstock_root/build_artifacts/folium_1638560701663/work
 GDAL==3.5.1
 geopandas @ file:///home/conda/feedstock_root/build_artifacts/geopandas_1658688831518/work
+graphviz @ file:///home/conda/feedstock_root/build_artifacts/python-graphviz_1658658635601/work
 idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1642433548627/work
 imagesize==1.4.1
 importlib-resources==5.9.0
@@ -139,7 +140,7 @@ sphinxcontrib-htmlhelp==2.0.0
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
--e git+https://github.com/AnttiHaerkoenen/socio-ethnic_segregation.git@59a965f33901318e74aaea0270e16868b95c4439#egg=src
+-e git+https://github.com/AnttiHaerkoenen/socio-ethnic_segregation.git@93ac2417a3e7efda9a4d52a3269e394cf7dcbe2b#egg=src
 stack-data==0.4.0
 tenacity==8.0.1
 terminado==0.15.0
