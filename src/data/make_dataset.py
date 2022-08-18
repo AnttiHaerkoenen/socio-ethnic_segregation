@@ -33,10 +33,20 @@ def main(input_filepath, output_filepath):
     data.rename(columns={
         'lutheran_density': 'lutheran',
         'orthodox_density': 'orthodox',
+        'total_density': 'population',
     }, inplace=True)
     data['total_income_ln'] = data.total_income.apply(np.log)
     data.loc[np.isneginf(data.total_income_ln), 'total_income_ln'] = None
     logger.info('total_income_ln created')
+
+    data['orthodox_proportion'] = data.orthodox / data.population
+    logger.info('orthodox_proportion created')
+
+    data['income_per_capita'] = data.total_income / data.population
+    logger.info('income_per_capita created')
+
+    data['income_per_capita_ln'] = data.income_per_capita.apply(np.log)
+    logger.info('income_per_capita_ln created')
 
     logger.info(f'Saving data to {plot_output_fp}')
     data.to_file(plot_output_fp)
