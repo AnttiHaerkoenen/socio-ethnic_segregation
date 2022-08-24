@@ -2,7 +2,6 @@
 import click
 import logging
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
 import numpy as np
 import geopandas as gpd
 
@@ -39,8 +38,21 @@ def main(input_filepath, output_filepath):
     data.loc[np.isneginf(data.total_income_ln), 'total_income_ln'] = None
     logger.info('total_income_ln created')
 
+    data['lutheran_ln'] = data.lutheran.apply(np.log)
+    logger.info('lutheran_ln created')
+
+    data['orthodox_ln'] = data.orthodox.apply(np.log)
+    logger.info('orthodox_ln created')
+
+    data['population_ln'] = data.population.apply(np.log)
+    logger.info('population_ln created')
+
     data['orthodox_proportion'] = data.orthodox / data.population
     logger.info('orthodox_proportion created')
+
+    data['orthodox_proportion_ln'] = data.orthodox_proportion.apply(np.log)
+    data.loc[np.isneginf(data.orthodox_proportion_ln), 'orthodox_proportion_ln'] = None
+    logger.info('orthodox_proportion_ln created')
 
     data['income_per_capita'] = data.total_income / data.population
     logger.info('income_per_capita created')
@@ -58,9 +70,5 @@ if __name__ == '__main__':
 
     # not used in this stub but often useful for finding various files
     project_dir = Path(__file__).resolve().parents[2]
-
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
 
     main()
