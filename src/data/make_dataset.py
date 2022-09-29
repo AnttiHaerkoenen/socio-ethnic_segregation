@@ -59,7 +59,7 @@ def main(input_filepath, output_filepath):
     data['income_per_capita'] = data.total_income / data.population
     logger.info('income_per_capita created')
 
-    data['income_per_capita_ln'] = data.income_per_capita.apply(np.log)
+    data['income_per_capita_ln'] = data.total_income_ln - data.population_ln
     logger.info('income_per_capita_ln created')
 
     logger.info(f'Saving data to {plot_output_fp}')
