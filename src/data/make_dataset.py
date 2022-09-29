@@ -34,9 +34,11 @@ def main(input_filepath, output_filepath):
         'orthodox_density': 'orthodox',
         'total_density': 'population',
     }, inplace=True)
-    data['total_income_ln'] = data.total_income.apply(np.log)
-    data.loc[np.isneginf(data.total_income_ln), 'total_income_ln'] = None
-    logger.info('total_income_ln created')
+
+    for col in ['total_income', 'estate_income', 'salary_pension_income', 'business_income']:
+        data[f'{col}_ln'] = data[col].apply(np.log)
+        data.loc[np.isneginf(data[f'{col}_ln']), f'{col}_ln'] = None
+        logger.info(f'{col}_ln created')
 
     data['lutheran_ln'] = data.lutheran.apply(np.log)
     logger.info('lutheran_ln created')
