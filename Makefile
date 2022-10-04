@@ -23,7 +23,10 @@ endif
 ## Install Python Dependencies
 requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+	conda update -n base -c defaults conda
+	conda install -c conda-forge "pymc>=4"
+	conda install -c conda-forge geopandas pygeos
+	conda install -c conda-forge --file requirements.txt
 
 ## Make Dataset
 data: requirements
@@ -59,7 +62,7 @@ create_environment:
 ifeq (True,$(HAS_CONDA))
 		@echo ">>> Detected conda, creating conda environment."
 ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
-	conda create --name $(PROJECT_NAME) python=3
+	conda create -c conda-forge --name $(PROJECT_NAME) python=3
 else
 	conda create --name $(PROJECT_NAME) python=2.7
 endif
@@ -80,7 +83,14 @@ test_environment:
 # PROJECT RULES                                                                 #
 #################################################################################
 
+## Save requirements to file
+save:
+	conda list --export > requirements.txt
 
+## Delete conda environment
+delete:
+	conda deactivate
+	conda env remove -n $(PROJECT_NAME)
 
 #################################################################################
 # Self Documenting Commands                                                     #
