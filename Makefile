@@ -26,11 +26,12 @@ requirements: test_environment
 	conda update -n base -c defaults conda
 	conda install -c conda-forge "pymc>=4"
 	conda install -c conda-forge geopandas pygeos
-	conda install -c conda-forge --file requirements.txt
+	conda install --file requirements.txt
 
 ## Make Dataset
-data: requirements
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
+data:
+	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
+	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 12 --seed 42
 
 ## Delete all compiled Python files
 clean:

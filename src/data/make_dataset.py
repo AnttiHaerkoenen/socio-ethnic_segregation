@@ -14,7 +14,7 @@ def main(input_filepath, output_filepath):
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('Making final data set from raw data')
+    logger.info('Making interim data set from raw data')
     input_fp = Path(input_filepath)
     output_fp = Path(output_filepath)
 
@@ -23,6 +23,7 @@ def main(input_filepath, output_filepath):
     plot_output_fp = output_fp / 'spatial_income_1880.gpkg'
 
     logger.info(f'Reading data from {plot_data_fp}')
+    logger.info('Checking coordinates')
     data = gpd.read_file(plot_data_fp).set_crs(epsg=3067)
     old_areas = gpd.read_file(old_areas_fp).set_crs(epsg=3067)
 
@@ -34,33 +35,6 @@ def main(input_filepath, output_filepath):
         'orthodox_density': 'orthodox',
         'total_density': 'population',
     }, inplace=True)
-
-    for col in ['total_income', 'estate_income', 'salary_pension_income', 'business_income']:
-        data[f'{col}_ln'] = data[col].apply(np.log)
-        data.loc[np.isneginf(data[f'{col}_ln']), f'{col}_ln'] = None
-        logger.info(f'{col}_ln created')
-
-    data['lutheran_ln'] = data.lutheran.apply(np.log)
-    logger.info('lutheran_ln created')
-
-    data['orthodox_ln'] = data.orthodox.apply(np.log)
-    logger.info('orthodox_ln created')
-
-    data['population_ln'] = data.population.apply(np.log)
-    logger.info('population_ln created')
-
-    data['orthodox_proportion'] = data.orthodox / data.population
-    logger.info('orthodox_proportion created')
-
-    data['orthodox_proportion_ln'] = data.orthodox_proportion.apply(np.log)
-    data.loc[np.isneginf(data.orthodox_proportion_ln), 'orthodox_proportion_ln'] = None
-    logger.info('orthodox_proportion_ln created')
-
-    data['income_per_capita'] = data.total_income / data.population
-    logger.info('income_per_capita created')
-
-    data['income_per_capita_ln'] = data.total_income_ln - data.population_ln
-    logger.info('income_per_capita_ln created')
 
     logger.info(f'Saving data to {plot_output_fp}')
     data.to_file(plot_output_fp)
