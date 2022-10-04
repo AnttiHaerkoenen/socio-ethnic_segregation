@@ -10,15 +10,15 @@ from sklearn.cluster import KMeans
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
 @click.argument('output_filepath', type=click.Path())
-@click.option('--n_clusters', default=10, type=click.IntRange(5, 25), help='number of clusters')
-@click.option('--seed', default=42, type=click.IntRange(0, 1000), help='seed for pseudorandom elements')
+@click.option('--n_clusters', default=10, type=click.IntRange(5, 25), help='Number of clusters')
+@click.option('--seed', default=42, type=click.IntRange(0, 1000), help='Seed for pseudorandom elements')
 def main(
         input_filepath,
         output_filepath,
         n_clusters,
         seed,
 ):
-    """ Runs data processing scripts to turn raw data from (../raw) into
+    """ Runs data processing scripts to turn interim data from (../interim) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
