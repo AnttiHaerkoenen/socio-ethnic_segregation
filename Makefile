@@ -84,6 +84,10 @@ test_environment:
 # PROJECT RULES                                                                 #
 #################################################################################
 
+## Train models
+train:
+	$(PYTHON_INTERPRETER) src/models/train_model.py data/processed models --seed 42
+
 ## Save requirements to file
 save:
 	conda list --export > requirements.txt
