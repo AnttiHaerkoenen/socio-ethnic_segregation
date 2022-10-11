@@ -86,7 +86,7 @@ test_environment:
 
 ## Train models
 train:
-	$(PYTHON_INTERPRETER) src/models/train_model.py data/processed models --seed 42
+	$(PYTHON_INTERPRETER) src/models/train_model.py data/processed models reports/figures --seed 42
 
 ## Save requirements to file
 save:
@@ -96,6 +96,15 @@ save:
 delete:
 	conda deactivate
 	conda env remove -n $(PROJECT_NAME)
+
+## Draw figures for reporting
+draw_figs: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
+	rsvg-convert ./reports/figures/model_1.svg -f png -o ./reports/figures/model_1.png -d 600 -p 600
+	rsvg-convert ./reports/figures/model_2.svg -f png -o ./reports/figures/model_2.png -d 600 -p 600
+	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
+
+./reports/figures/model_1.png: draw_figs
+./reports/figures/model_2.png: draw_figs
 
 #################################################################################
 # Self Documenting Commands                                                     #

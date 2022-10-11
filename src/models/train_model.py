@@ -8,13 +8,16 @@ import pymc as pm
 import pandas as pd
 import geopandas as gpd
 
+
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
 @click.argument('model_filepath', type=click.Path())
+@click.argument('figure_filepath', type=click.Path())
 @click.option('--seed', default=42, type=click.IntRange(0, 1000), help='Seed for pseudorandom elements')
 def main(
         input_filepath,
         model_filepath,
+        figure_filepath,
         seed,
 ):
     """ Train models and save them to 'model_filepath'
@@ -22,6 +25,7 @@ def main(
     logger = logging.getLogger(__name__)
     data_fp = Path(input_filepath)
     model_fp = Path(model_filepath)
+    figure_fp = Path(figure_filepath)
 
     data = gpd.read_file(data_fp / 'spatial_income_1880.gpkg')
     n_clusters = len(data.group.unique())
@@ -31,6 +35,7 @@ def main(
     data = data.drop(index=data[data.population < 5].index).dropna().reset_index()
 
     logger.info('Training model 1')
+
     with pm.Model() as model_1:
         W = pm.MutableData('W', -data['3'])
 
@@ -64,6 +69,12 @@ def main(
     posterior_prediction_1.to_netcdf(model_1_dir / 'posterior_prediction')
 
     logger.info('Model 1 saved')
+
+    logger.info('Saving model 1 as plate diagram')
+    graph_1 = pm.model_to_graphviz(model_1)
+    graph_1.format = 'svg'
+    graph_1.render(figure_fp / 'model_1')
+    logger.info('Plate diagram saved')
 
     logger.info('Training model 2')
     with pm.Model() as model_2:
@@ -102,6 +113,12 @@ def main(
     posterior_prediction_2.to_netcdf(model_2_dir / 'posterior_prediction')
 
     logger.info('Model 2 saved')
+
+    logger.info('Saving model 2 as plate diagram')
+    graph_2 = pm.model_to_graphviz(model_2)
+    graph_2.format = 'svg'
+    graph_2.render(figure_fp / 'model_2')
+    logger.info('Plate diagram saved')
 
 
 if __name__ == '__main__':
