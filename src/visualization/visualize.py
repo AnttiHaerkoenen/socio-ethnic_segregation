@@ -42,7 +42,7 @@ def main(
     ppc_1 = az.plot_ppc(
         posterior_prediction_1,
         legend=False,
-        num_pp_samples=100,
+        num_pp_samples=500,
     )
     plt.legend(loc='upper right')
     plt.tight_layout()
@@ -50,7 +50,7 @@ def main(
     ppc_2 = az.plot_ppc(
         posterior_prediction_2,
         legend=False,
-        num_pp_samples=100,
+        num_pp_samples=500,
     )
     plt.legend(loc='upper right')
     plt.tight_layout()
@@ -73,23 +73,35 @@ def main(
 
     logger.info('Plotting a map of clusters')
     cluster_colors = plt.get_cmap('tab20')
-    fig, ax = plt.subplots(figsize=(15, 12))
+    fig, ax = plt.subplots(figsize=(12, 10))
     data.plot(
         ax=ax,
         column='group',
         categorical=True,
         cmap=cluster_colors,
-        markersize=5,
+        markersize=25,
+        edgecolor='black',
+        alpha=0.8,
         legend=True,
+        legend_kwds={
+            'title': 'Clusters',
+            'loc': 'lower left',
+            'frameon': True,
+            'framealpha': 1,
+            'edgecolor': 'black',
+        }
     )
-    offset = 200
+    offset = 100
     x_min, y_min, x_max, y_max = data.total_bounds
     water.plot(
         ax=ax,
-        color='#1fb9db'
+        color='#1fb9db',
     )
     ax.set_ylim(y_min - offset, y_max + offset)
     ax.set_xlim(x_min - offset, x_max + offset)
+    plt.xticks([])
+    plt.yticks([])
+    fig.tight_layout()
     plt.savefig(figure_fp / 'cluster_map.png', dpi=300)
 
 
