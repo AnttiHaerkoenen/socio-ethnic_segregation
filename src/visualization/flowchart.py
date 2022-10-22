@@ -2,26 +2,35 @@
 import logging
 from pathlib import Path
 
-import graphviz
+from schemdraw import flow
 import click
 
 
 @click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('figure_filepath', type=click.Path())
+@click.argument('figure_filepath', type=click.Path(exists=True))
 def main(
-        input_filepath,
         figure_filepath,
 ):
     """
-    Draw a flowchart from a dot file and save it to image file
+    Draw a flowchart and save it to image file
     """
     logger = logging.getLogger(__name__)
-    input_fp = Path(input_filepath)
     figure_fp = Path(figure_filepath)
 
-    dot = graphviz.Source.from_file(input_fp / 'flowchart.dot')
-    graph = graphviz.DiGraph(dot)
+    with schemdraw.Drawing(file=figure_fp / 'flowchart.svg') as d:
+        d.config(fontsize=12)
+        d += (sd := flow.Data().label('Spatial data'))
+        d += flow.Arrow().down()
+        d += (id := flow.Data().label('Income data'))
+        d += flow.Arrow().down()
+        d += (dd := flow.Data().label('Demographic data'))
+        d += flow.Arrow().down()
+
+        d += (cd := flow.Box().label('Combine data'))
+        d += flow.Arrow().down()
+        d += (cl := flow.Box().label('Clean data'))
+        d += flow.Arrow().down()
+        d += (clust := flow.Box().label('Create clusters'))
 
 
 if __name__ == '__main__':
