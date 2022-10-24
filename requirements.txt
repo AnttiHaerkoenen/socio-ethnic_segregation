@@ -62,6 +62,7 @@ fastjsonschema=2.16.2=pypi_0
 fastprogress=1.0.3=pyhd8ed1ab_0
 filelock=3.8.0=pyhd8ed1ab_0
 fiona=1.8.21=py310h60a68a4_2
+flake8=5.0.4=pypi_0
 folium=0.12.1.post1=pyhd8ed1ab_1
 font-ttf-dejavu-sans-mono=2.37=hab24e00_0
 font-ttf-inconsolata=3.000=h77eed37_0
@@ -176,6 +177,7 @@ mapclassify=2.4.3=pyhd8ed1ab_0
 markupsafe=2.1.1=py310h5764c6d_1
 matplotlib-base=3.6.0=py310h8d5ebf3_0
 matplotlib-inline=0.1.6=pypi_0
+mccabe=0.7.0=pypi_0
 minikanren=1.0.3=pyhd8ed1ab_0
 mistune=2.0.4=pypi_0
 mkl=2022.1.0=h84fe81f_915
@@ -220,7 +222,9 @@ psutil=5.9.2=pypi_0
 pthread-stubs=0.4=h36c2ea0_1001
 ptyprocess=0.7.0=pypi_0
 pure-eval=0.2.2=pypi_0
+pycodestyle=2.9.1=pypi_0
 pycparser=2.21=pyhd8ed1ab_0
+pyflakes=2.5.0=pypi_0
 pygeos=0.13=py310h5e49deb_0
 pygments=2.13.0=pypi_0
 pymc=4.2.1=hd8ed1ab_0
@@ -241,6 +245,7 @@ qtpy=2.2.1=pypi_0
 readline=8.1.2=h0f457ee_0
 requests=2.28.1=pyhd8ed1ab_1
 rtree=1.0.0=py310hbdcdc62_1
+schemdraw=0.15=pypi_0
 scikit-learn=1.1.2=py310h0c3af53_0
 scipy=1.9.1=py310hdfbd76f_0
 send2trash=1.8.0=pypi_0

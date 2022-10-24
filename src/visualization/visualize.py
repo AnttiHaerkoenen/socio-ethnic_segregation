@@ -42,7 +42,7 @@ def main(
     ppc_1 = az.plot_ppc(
         posterior_prediction_1,
         legend=False,
-        num_pp_samples=500,
+        num_pp_samples=1000,
     )
     plt.legend(loc='upper right')
     plt.tight_layout()
@@ -50,21 +50,24 @@ def main(
     ppc_2 = az.plot_ppc(
         posterior_prediction_2,
         legend=False,
-        num_pp_samples=500,
+        num_pp_samples=1000,
     )
     plt.legend(loc='upper right')
     plt.tight_layout()
     plt.savefig(figure_fp / 'model_2_posterior_predictive_check.png', dpi=300)
 
     logger.info('Plotting posterior distributions')
-    az.plot_posterior(posterior_2, var_names='β_O', grid=(12, 3), figsize=(15, 15))
+    az.plot_posterior(posterior_2, var_names='β_O', grid=(12, 3), figsize=(12, 36))
+    plt.savefig(figure_fp / 'model_2_posterior', dpi=300)
 
     logger.info('Plotting trace plot')
     az.plot_trace(posterior_2)
+    plt.tight_layout()
     plt.savefig(figure_fp / 'model_2_trace.png', dpi=300)
 
     logger.info('Plotting forest plot of the posterior')
     az.plot_forest(posterior_2, combined=True, hdi_prob=0.95)
+    plt.tight_layout()
     plt.savefig(figure_fp / 'model_2_forest_plot', dpi=300)
 
     logger.info('Saving summary data for model')

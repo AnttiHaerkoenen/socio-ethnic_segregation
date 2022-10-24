@@ -103,7 +103,8 @@ draw_figs: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
 	rsvg-convert ./reports/figures/model_1.svg -f png -o ./reports/figures/model_1.png -d 600 -p 600
 	rsvg-convert ./reports/figures/model_2.svg -f png -o ./reports/figures/model_2.png -d 600 -p 600
 	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
-	$(PYTHON_INTERPRETER) src/visualization/flowchart.py data/processed reports/figures
+	$(PYTHON_INTERPRETER) src/visualization/flowchart.py reports/figures
+	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 600
 
 ./reports/figures/model_1.png: draw_figs
 ./reports/figures/model_2.png: draw_figs
