@@ -15,6 +15,7 @@ def main(input_filepath, output_filepath):
     """
     logger = logging.getLogger(__name__)
     logger.info("Making interim data set from raw data")
+
     input_fp = Path(input_filepath)
     output_fp = Path(output_filepath)
     plot_data_fp = input_fp / "spatial_income_1880.gpkg"
@@ -22,12 +23,15 @@ def main(input_filepath, output_filepath):
     water_fp = input_fp / "water_1913.gpkg"
     plot_output_fp = output_fp / "spatial_income_1880.gpkg"
     water_output_fp = output_fp / "water_1913.gpkg"
+
     logger.info(f"Reading data from {plot_data_fp}")
     data = gpd.read_file(plot_data_fp).set_crs(epsg=3067)
     water = gpd.read_file(water_fp).set_crs(epsg=3067)
     old_areas = gpd.read_file(old_areas_fp).set_crs(epsg=3067)
+
     logger.info("Checking coordinates")
     assert data.crs == old_areas.crs == water.crs == "epsg:3067"
+    
     data["is_old"] = data.geometry.within(old_areas.unary_union)
     data.rename(
         columns={
