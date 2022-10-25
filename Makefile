@@ -38,8 +38,9 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
-## Lint using flake8
+## Lint and style
 lint:
+	black src notebooks
 	flake8 src
 
 ## Set up python interpreter environment
