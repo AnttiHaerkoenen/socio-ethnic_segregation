@@ -7,7 +7,7 @@ import geopandas as gpd
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
-@click.argument("output_filepath", type=click.Path())
+@click.argument("output_filepath", type=click.Path(exists=True))
 def main(input_filepath, output_filepath):
     """
     Runs data processing scripts to turn raw data from (../raw) into
@@ -31,7 +31,7 @@ def main(input_filepath, output_filepath):
 
     logger.info("Checking coordinates")
     assert data.crs == old_areas.crs == water.crs == "epsg:3067"
-    
+
     data["is_old"] = data.geometry.within(old_areas.unary_union)
     data.rename(
         columns={

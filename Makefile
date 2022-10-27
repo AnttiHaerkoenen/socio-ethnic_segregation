@@ -30,7 +30,7 @@ requirements: test_environment
 ## Make Dataset
 data:
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
-	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 12 --seed 42
+	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 15 --seed 42
 	mv data/interim/water_1913.gpkg data/processed/
 
 ## Delete all compiled Python files
@@ -84,16 +84,19 @@ delete:
 	conda deactivate
 	conda env remove -n $(PROJECT_NAME)
 
+./reports/figures/model_1.svg: train
+./reports/figures/model_2.svg: train
+
 ## Draw figures for reporting
-draw_figs: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
+figures: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
 	rsvg-convert ./reports/figures/model_1.svg -f png -o ./reports/figures/model_1.png -d 600 -p 600
 	rsvg-convert ./reports/figures/model_2.svg -f png -o ./reports/figures/model_2.png -d 600 -p 600
 	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
 	$(PYTHON_INTERPRETER) src/visualization/flowchart.py reports/figures
 	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 600
 
-./reports/figures/model_1.png: draw_figs
-./reports/figures/model_2.png: draw_figs
+./reports/figures/model_1.png: figures
+./reports/figures/model_2.png: figures
 
 #################################################################################
 # Self Documenting Commands                                                     #

@@ -24,8 +24,6 @@ def main(
         d += flow.Arrow().down(d.unit / 2).at(cd.S)
         d += flow.Box(w=4).label("Clean data")
         d += flow.Arrow().down(d.unit / 2)
-        d += flow.Box(w=4).label("Factor analysis")
-        d += flow.Arrow().down(d.unit / 2)
         d += flow.Box(w=4).label("Create clusters")
         d += flow.Arrow().down(d.unit / 2)
         d += flow.Box(w=4).label("Multilevel regression")
