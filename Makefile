@@ -21,11 +21,8 @@ endif
 
 ## Install Python Dependencies
 requirements: test_environment
-	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	conda update -n base -c defaults conda -y
-	conda install -c conda-forge "pymc>=4" -y
 	conda install -c conda-forge geopandas pygeos -y
-	conda install --file requirements.txt
+	conda install --file requirements.txt -y
 
 ## Make Dataset
 data:
@@ -45,23 +42,11 @@ lint:
 
 ## Set up python interpreter environment
 create_environment:
-ifeq (True,$(HAS_CONDA))
-		@echo ">>> Detected conda, creating conda environment."
 ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
-	conda create -c conda-forge --name $(PROJECT_NAME) python=3
-else
-	conda create --name $(PROJECT_NAME) python=2.7
+	conda create -c conda-forge "pymc>=4" --name $(PROJECT_NAME) -y
 endif
 	@echo ">>> New conda env created."
-	conda activate $(PROJECT_NAME)
-	@echo ">>> New conda env activated."
-else
-	$(PYTHON_INTERPRETER) -m pip install -q virtualenv virtualenvwrapper
-	@echo ">>> Installing virtualenvwrapper if not already installed.\nMake sure the following lines are in shell startup file\n\
-	export WORKON_HOME=$$HOME/.virtualenvs\nexport PROJECT_HOME=$$HOME/Devel\nsource /usr/local/bin/virtualenvwrapper.sh\n"
-	@bash -c "source `which virtualenvwrapper.sh`;mkvirtualenv $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER)"
-	@echo ">>> New virtualenv created."
-endif
+
 
 ## Test python environment is setup correctly
 test_environment:
@@ -93,10 +78,7 @@ figures: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
 	rsvg-convert ./reports/figures/model_2.svg -f png -o ./reports/figures/model_2.png -d 600 -p 600
 	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
 	$(PYTHON_INTERPRETER) src/visualization/flowchart.py reports/figures
-	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 600
-
-./reports/figures/model_1.png: figures
-./reports/figures/model_2.png: figures
+	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 60
 
 #################################################################################
 # Self Documenting Commands                                                     #
