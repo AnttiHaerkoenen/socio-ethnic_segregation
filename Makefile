@@ -1,11 +1,10 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
+.PHONY: clean data lint requirements
 
 #################################################################################
 # GLOBALS                                                                       #
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
 PROFILE = default
 PROJECT_NAME = socio-ethnic_segregation
 PYTHON_INTERPRETER = python3
@@ -22,16 +21,13 @@ endif
 
 ## Install Python Dependencies
 requirements: test_environment
-	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	conda update -n base -c defaults conda
-	conda install -c conda-forge "pymc>=4"
-	conda install -c conda-forge geopandas pygeos
-	conda install --file requirements.txt
+	conda install -c conda-forge geopandas pygeos -y
+	conda install --file requirements.txt -y
 
 ## Make Dataset
 data:
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
-	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 12 --seed 42
+	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 15 --seed 42
 	mv data/interim/water_1913.gpkg data/processed/
 
 ## Delete all compiled Python files
@@ -39,43 +35,18 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
-## Lint using flake8
+## Lint and style
 lint:
+	black src notebooks
 	flake8 src
-
-## Upload Data to S3
-sync_data_to_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync data/ s3://$(BUCKET)/data/
-else
-	aws s3 sync data/ s3://$(BUCKET)/data/ --profile $(PROFILE)
-endif
-
-## Download Data from S3
-sync_data_from_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync s3://$(BUCKET)/data/ data/
-else
-	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
-endif
 
 ## Set up python interpreter environment
 create_environment:
-ifeq (True,$(HAS_CONDA))
-		@echo ">>> Detected conda, creating conda environment."
 ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
-	conda create -c conda-forge --name $(PROJECT_NAME) python=3
-else
-	conda create --name $(PROJECT_NAME) python=2.7
+	conda create -c conda-forge "pymc>=4" --name $(PROJECT_NAME) -y
 endif
-	@echo ">>> New conda env created. Activate with:\nsource activate $(PROJECT_NAME)"
-else
-	$(PYTHON_INTERPRETER) -m pip install -q virtualenv virtualenvwrapper
-	@echo ">>> Installing virtualenvwrapper if not already installed.\nMake sure the following lines are in shell startup file\n\
-	export WORKON_HOME=$$HOME/.virtualenvs\nexport PROJECT_HOME=$$HOME/Devel\nsource /usr/local/bin/virtualenvwrapper.sh\n"
-	@bash -c "source `which virtualenvwrapper.sh`;mkvirtualenv $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER)"
-	@echo ">>> New virtualenv created. Activate with:\nworkon $(PROJECT_NAME)"
-endif
+	@echo ">>> New conda env created."
+
 
 ## Test python environment is setup correctly
 test_environment:
@@ -98,15 +69,16 @@ delete:
 	conda deactivate
 	conda env remove -n $(PROJECT_NAME)
 
+./reports/figures/model_1.svg: train
+./reports/figures/model_2.svg: train
+
 ## Draw figures for reporting
-draw_figs: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
+figures: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
 	rsvg-convert ./reports/figures/model_1.svg -f png -o ./reports/figures/model_1.png -d 600 -p 600
 	rsvg-convert ./reports/figures/model_2.svg -f png -o ./reports/figures/model_2.png -d 600 -p 600
 	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
-	$(PYTHON_INTERPRETER) src/visualization/flowchart.py data/processed reports/figures
-
-./reports/figures/model_1.png: draw_figs
-./reports/figures/model_2.png: draw_figs
+	$(PYTHON_INTERPRETER) src/visualization/flowchart.py reports/figures
+	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 60
 
 #################################################################################
 # Self Documenting Commands                                                     #

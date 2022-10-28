@@ -1,0 +1,53 @@
+digraph {
+	subgraph cluster829 {
+		O [label="O
+~
+Normal" shape=ellipse style=filled]
+		W [label="W
+~
+MutableData" shape=box style="rounded, filled"]
+		P [label="P
+~
+Normal" shape=ellipse style=filled]
+		label=829 labeljust=r labelloc=b style=rounded
+	}
+	subgraph cluster2 {
+		"θ_P" [label="θ_P
+~
+MvNormal" shape=ellipse]
+		label=2 labeljust=r labelloc=b style=rounded
+	}
+	subgraph cluster3 {
+		"θ_O" [label="θ_O
+~
+MvNormal" shape=ellipse]
+		label=3 labeljust=r labelloc=b style=rounded
+	}
+	subgraph "cluster12 x 2" {
+		"β_P" [label="β_P
+~
+MvNormal" shape=ellipse]
+		label="12 x 2" labeljust=r labelloc=b style=rounded
+	}
+	subgraph "cluster12 x 3" {
+		"β_O" [label="β_O
+~
+MvNormal" shape=ellipse]
+		label="12 x 3" labeljust=r labelloc=b style=rounded
+	}
+	"σ_O" [label="σ_O
+~
+Exponential" shape=ellipse]
+	"σ_P" [label="σ_P
+~
+Exponential" shape=ellipse]
+	"θ_P" -> "β_P"
+	"θ_O" -> "β_O"
+	W -> P
+	"σ_P" -> P
+	"β_P" -> P
+	"σ_O" -> O
+	"β_O" -> O
+	W -> O
+	"β_P" -> O
+}
