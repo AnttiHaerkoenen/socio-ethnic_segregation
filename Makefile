@@ -42,9 +42,7 @@ lint:
 
 ## Set up python interpreter environment
 create_environment:
-ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
 	conda create -c conda-forge "pymc>=4" --name $(PROJECT_NAME) -y
-endif
 	@echo ">>> New conda env created."
 
 
