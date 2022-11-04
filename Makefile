@@ -45,7 +45,6 @@ create_environment:
 	conda create -c conda-forge "pymc>=4" --name $(PROJECT_NAME) -y
 	@echo ">>> New conda env created."
 
-
 ## Test python environment is setup correctly
 test_environment:
 	$(PYTHON_INTERPRETER) test_environment.py
