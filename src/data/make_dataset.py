@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import click
 import logging
 from pathlib import Path
+
+import click
 import geopandas as gpd
 
 

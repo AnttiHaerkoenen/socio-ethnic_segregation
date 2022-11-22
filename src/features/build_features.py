@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 import numpy as np
 import geopandas as gpd
+import pandas as pd
 from sklearn.cluster import KMeans
 
 
@@ -39,6 +40,9 @@ def main(
 
     plot_data_fp = input_fp / "spatial_income_1880.gpkg"
     plot_output_fp = output_fp / "spatial_income_1880.gpkg"
+
+    income_data_fp = input_fp / "income_tax_record_1880.csv"
+    income_output_fp = output_fp / "income_tax_record_1880.csv"
 
     logger.info(f"Reading data from {plot_data_fp}")
     data = gpd.read_file(plot_data_fp).set_crs(epsg=3067)
@@ -83,6 +87,14 @@ def main(
     logger.info(f"Saving data to {plot_output_fp}")
     data.to_file(plot_output_fp)
 
+    logger.info(f"Reading data from {income_data_fp}")
+    tax = pd.read_csv(income_data_fp, index_col=0)
+
+    tax['total_income'] = tax.loc[:, ["estate_income", "business_income", "salary_pension_income"]].sum(axis=1)
+    logger.info("total_income created in tax data")
+
+    logger.info(f"Saving data to {income_output_fp}")
+    tax.to_csv(income_output_fp)
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -27,8 +27,9 @@ requirements: test_environment
 ## Make Dataset
 data:
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
+	cp data/raw/income_tax_record_1880.csv data/interim/
 	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 15 --seed 42
-	mv data/interim/water_1913.gpkg data/processed/
+	cp data/interim/water_1913.gpkg data/processed/
 
 ## Delete all compiled Python files
 clean:
