@@ -92,6 +92,9 @@ def main(
 
     tax['total_income'] = tax.loc[:, ["estate_income", "business_income", "salary_pension_income"]].sum(axis=1)
     logger.info("total_income created in tax data")
+    ordering, _ = pd.factorize(tax.total_income, sort=True)
+    tax["order"] = ordering.max() - ordering + 1
+    logger.info("order created in tax data")
 
     logger.info(f"Saving data to {income_output_fp}")
     tax.to_csv(income_output_fp)

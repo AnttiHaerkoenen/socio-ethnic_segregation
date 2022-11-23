@@ -7,6 +7,9 @@ import numpy as np
 import pymc as pm
 import pandas as pd
 import geopandas as gpd
+import aesara.tensor as at
+from sklearn.preprocessing import StandardScaler
+from scipy.spatial import distance_matrix
 
 
 @click.command()
@@ -31,48 +34,36 @@ def main(
     model_fp = Path(model_filepath)
     figure_fp = Path(figure_filepath)
 
+    logger.info("Preparing data")
     data = gpd.read_file(data_fp / "spatial_income_1880.gpkg")
-    n_clusters = len(data.group.unique())
-
-    pca_transformed = pd.read_csv(data_fp / "pca_transformed.csv", index_col=0).drop(
-        columns=["geometry"]
-    )
-    data = data.join(pca_transformed)
     data = data.drop(index=data[data.population < 5].index).dropna().reset_index()
+    N_CLUSTERS = len(data.group.unique())
+    N = data.shape[0]
+    O_norm = StandardScaler().fit_transform(data.orthodox_proportion_ln.values.reshape(-1, 1)).flatten()
 
+    logger.info("Calculating distance matrix")
+    xy = pd.DataFrame({"x": data.geometry.x, "y": data.geometry.y, "group": data.group})
+    d = distance_matrix(xy, xy)
+    
     logger.info("Training model 1")
 
     with pm.Model() as model_1:
-        W = pm.MutableData("W", -data["3"])
+        idx = data.group
+        W = pm.MutableData("W", data.total_income_ln)
 
-        β_P = pm.MvNormal(
-            "β_P", np.array([0, 0]), np.array(np.diagflat([0.1, 0.1])), shape=2
+        θ = pm.Normal("θ", [0, 0], [0.1, 0.1], shape=2)
+
+        β = pm.MvNormal(
+            "β", mu=θ, cov=np.diagflat(np.array([ 0.1, 0.1])), shape=(N_CLUSTERS, 2)
         )
+        μ = at.math.sigmoid(β[idx, 0] + β[idx, 1] * W)
+        σ = pm.HalfNormal("σ", 0.01)
 
-        μ_P = β_P[0] + β_P[1] * W
-        σ_P = pm.Exponential("σ_P", 1)
-        P = pm.Normal("P", mu=μ_P, sigma=σ_P, observed=-data["1"])
+        O = pm.Beta("O", mu=μ, sigma=σ, observed=data.orthodox_proportion)
 
-        β_O = pm.MvNormal(
-            "β_O", np.array([0, 0, 0]), np.array(np.diagflat([0.1, 0.1, 0.1])), shape=3
-        )
-
-        μ_O = β_O[0] + β_O[1] * W + β_O[2] * μ_P
-        σ_O = pm.Exponential("σ_O", 1)
-        O = pm.Normal("O", mu=μ_O, sigma=σ_O, observed=data["2"])
-
-        prior_1 = pm.sample_prior_predictive(samples=1000, random_seed=seed)
-        posterior_1 = pm.sample(
-            draws=1000,
-            tune=1000,
-            init="adapt_diag",
-            return_inferencedata=True,
-            target_accept=0.9,
-            random_seed=seed,
-        )
-        posterior_prediction_1 = pm.sample_posterior_predictive(
-            posterior_1, random_seed=seed
-        )
+        prior_1 = pm.sample_prior_predictive(random_seed=seed)
+        posterior_1 = pm.sample(init="adapt_diag", return_inferencedata=True, target_accept=0.95, random_seed=seed)
+        posterior_prediction_1 = pm.sample_posterior_predictive(posterior_1, random_seed=seed)
 
     logger.info("Saving model 1 to netcdf files")
 
@@ -95,43 +86,39 @@ def main(
     logger.info("Plate diagram saved")
 
     logger.info("Training model 2")
+
     with pm.Model() as model_2:
-        W = pm.MutableData("W", -data["3"])
-        idx = data.group
+        idx = data.group.loc[::5]
+        W = pm.MutableData("W", data.total_income_ln.loc[::5])
+        N = 170
+        d = d[::5, ::5]
 
-        θ_P = pm.MvNormal(
-            "θ_P", np.array([0, 0]), np.array(np.diagflat([0.1, 0.1])), shape=2
-        )
-        θ_O = pm.MvNormal(
-            "θ_O", np.array([0, 0, 0]), np.array(np.diagflat([0.1, 0.1, 0.01])), shape=3
-        )
-
-        β_P = pm.MvNormal(
-            "β_P", θ_P, np.array(np.diagflat([0.01, 0.01])), shape=(n_clusters, 2)
-        )
-        β_O = pm.MvNormal(
-            "β_O", θ_O, np.array(np.diagflat([0.01, 0.01, 0.01])), shape=(n_clusters, 3)
+        θ = pm.Normal("θ", [0, 0], [0.1, 0.1], shape=2)
+        β = pm.MvNormal(
+            "β", mu=θ, cov=np.diagflat(np.array([ 0.01, 0.01])), shape=(N_CLUSTERS, 2)
         )
 
-        μ_P = β_P[idx, 0] + β_P[idx, 1] * W
-        σ_P = pm.Exponential("σ_P", 1)
-        P = pm.Normal("P", mu=μ_P, sigma=σ_P, observed=-data["1"])
+        η2 = pm.Exponential('η²', 1)
+        ρ2 = pm.Exponential('ρ²', 1)
+        K = η2 * (at.exp(-ρ2 * at.power(d, 2)) + np.diag([0.01] * N))
 
-        μ_O = β_O[idx, 0] + β_O[idx, 1] * W + β_O[idx, 2] * μ_P
-        σ_O = pm.Exponential("σ_O", 1)
-        O = pm.Normal("O", mu=μ_O, sigma=σ_O, observed=data["2"])
+        γ = pm.MvNormal("γ", mu=np.zeros(N), cov=K, shape=N)
+        μ = β[idx, 0] + β[idx, 1] * W + γ
+        σ = pm.HalfNormal("σ", 0.01)
+        O = pm.Normal("O", mu=μ, sigma=σ, observed=O_norm[::5])
 
-        prior_2 = pm.sample_prior_predictive(samples=1000, random_seed=seed)
+        prior_2 = pm.sample_prior_predictive(samples=100, random_seed=seed)
         posterior_2 = pm.sample(
             draws=1000,
             tune=1000,
             init="adapt_diag",
             return_inferencedata=True,
-            target_accept=0.9,
+            target_accept=0.95,
             random_seed=seed,
         )
         posterior_prediction_2 = pm.sample_posterior_predictive(
-            posterior_2, random_seed=seed
+            posterior_2, 
+            random_seed=seed,
         )
 
     logger.info("Saving model 2 to netcdf files")
