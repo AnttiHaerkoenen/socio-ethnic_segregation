@@ -18,6 +18,7 @@ def main(
     logger = logging.getLogger(__name__)
     figure_fp = Path(figure_filepath)
 
+    logger.info("Drawing flowchart")
     with schemdraw.Drawing(file=figure_fp / "flowchart.svg", show=False) as d:
         d.config(fontsize=12)
         d += (cd := flow.Box(w=4).label("Combine data"))

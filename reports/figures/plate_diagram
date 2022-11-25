@@ -1,0 +1,42 @@
+digraph {
+	subgraph cluster646 {
+		"γ" [label="γ
+~
+MvNormal" shape=ellipse]
+		W [label="W
+~
+MutableData" shape=box style="rounded, filled"]
+		O [label="O
+~
+Normal" shape=ellipse style=filled]
+		label=646 labeljust=r labelloc=b style=rounded
+	}
+	subgraph cluster2 {
+		"θ" [label="θ
+~
+Normal" shape=ellipse]
+		label=2 labeljust=r labelloc=b style=rounded
+	}
+	subgraph "cluster12 x 2" {
+		"β" [label="β
+~
+MvNormal" shape=ellipse]
+		label="12 x 2" labeljust=r labelloc=b style=rounded
+	}
+	"ρ²" [label="ρ²
+~
+Exponential" shape=ellipse]
+	"η²" [label="η²
+~
+Exponential" shape=ellipse]
+	"σ" [label="σ
+~
+HalfNormal" shape=ellipse]
+	"θ" -> "β"
+	"ρ²" -> "γ"
+	"η²" -> "γ"
+	"γ" -> O
+	W -> O
+	"β" -> O
+	"σ" -> O
+}

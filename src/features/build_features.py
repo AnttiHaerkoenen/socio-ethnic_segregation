@@ -70,7 +70,9 @@ def main(
     logger.info("orthodox_proportion created")
 
     data["orthodox_proportion_ln"] = data.orthodox_proportion.apply(np.log)
-    data = data.drop(index=data[np.isneginf(data.orthodox_proportion_ln)].index).reset_index()
+    data = data.drop(
+        index=data[np.isneginf(data.orthodox_proportion_ln)].index
+    ).reset_index()
     logger.info("orthodox_proportion_ln created, negative infinities removed")
 
     data["income_per_capita"] = data.total_income / data.population
@@ -90,7 +92,9 @@ def main(
     logger.info(f"Reading data from {income_data_fp}")
     tax = pd.read_csv(income_data_fp, index_col=0)
 
-    tax['total_income'] = tax.loc[:, ["estate_income", "business_income", "salary_pension_income"]].sum(axis=1)
+    tax["total_income"] = tax.loc[
+        :, ["estate_income", "business_income", "salary_pension_income"]
+    ].sum(axis=1)
     logger.info("total_income created in tax data")
     ordering, _ = pd.factorize(tax.total_income, sort=True)
     tax["order"] = ordering.max() - ordering + 1
@@ -98,6 +102,7 @@ def main(
 
     logger.info(f"Saving data to {income_output_fp}")
     tax.to_csv(income_output_fp)
+
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

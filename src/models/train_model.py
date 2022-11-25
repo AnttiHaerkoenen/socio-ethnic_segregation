@@ -22,11 +22,39 @@ from scipy.spatial import distance_matrix
     type=click.IntRange(0, 1000),
     help="Seed for pseudorandom elements",
 )
+@click.option(
+    "--prior_samples",
+    default=100,
+    type=click.IntRange(10, 2000),
+    help="Number of samples from prior distribution",
+)
+@click.option(
+    "--draws",
+    default=1000,
+    type=click.IntRange(10, 2000),
+    help="Number of draws from posterior distribution",
+)
+@click.option(
+    "--tune",
+    default=1000,
+    type=click.IntRange(10, 2000),
+    help="Number of tuning samples",
+)
+@click.option(
+    "--target_accept",
+    default=0.95,
+    type=click.FloatRange(0.5, 0.99),
+    help="Target accept threshold for NUTS",
+)
 def main(
     input_filepath,
     model_filepath,
     figure_filepath,
     seed,
+    prior_samples,
+    draws,
+    tune,
+    target_accept,
 ):
     """Train models and save them to 'model_filepath'"""
     logger = logging.getLogger(__name__)
@@ -38,7 +66,11 @@ def main(
     data = gpd.read_file(data_fp / "spatial_income_1880.gpkg")
     N_CLUSTERS = len(data.group.unique())
     N = data.shape[0]
-    O_norm = StandardScaler().fit_transform(data.orthodox_proportion_ln.values.reshape(-1, 1)).flatten()
+    O_norm = (
+        StandardScaler()
+        .fit_transform(data.orthodox_proportion_ln.values.reshape(-1, 1))
+        .flatten()
+    )
 
     logger.info("Calculating distance matrix")
     xy = pd.DataFrame({"x": data.geometry.x, "y": data.geometry.y, "group": data.group})
@@ -51,27 +83,32 @@ def main(
         W = pm.MutableData("W", data.total_income_ln)
         θ = pm.Normal("θ", [0, 0], [0.1, 0.1], shape=2)
         β = pm.MvNormal(
-            "β", mu=θ, cov=np.diagflat(np.array([ 0.01, 0.01])), shape=(N_CLUSTERS, 2)
+            "β", mu=θ, cov=np.diagflat(np.array([0.01, 0.01])), shape=(N_CLUSTERS, 2)
         )
-        η2 = pm.Exponential('η²', 1)
-        ρ2 = pm.Exponential('ρ²', 1)
-        K = η2 * (at.exp(-ρ2 * at.power(d, 2)) + np.diag([0.01] * N))
+        η2 = pm.Exponential("η²", 1)
+        ρ2 = pm.Exponential("ρ²", 1)
+        K = η2 * at.exp(-ρ2 * at.power(d, 2)) + np.diag([0.01] * N)
         γ = pm.MvNormal("γ", mu=np.zeros(N), cov=K, shape=N)
         μ = β[idx, 0] + β[idx, 1] * W + γ
         σ = pm.HalfNormal("σ", 0.01)
         O = pm.Normal("O", mu=μ, sigma=σ, observed=O_norm)
-
-        prior = pm.sample_prior_predictive(samples=100, random_seed=seed)
+        logger.info(f"Drawing {prior_samples} samples from prior distribution")
+        prior = pm.sample_prior_predictive(samples=prior_samples, random_seed=seed)
+        logger.info(
+            f"Drawing {draws} samples from posterior distribution with {tune} tuning samples,\
+                 target_accept={target_accept}"
+        )
         posterior = pm.sample(
-            draws=1000,
-            tune=1000,
+            draws=draws,
+            tune=tune,
             init="adapt_diag",
             return_inferencedata=True,
-            target_accept=0.95,
+            target_accept=target_accept,
             random_seed=seed,
         )
+        logger.info("Sampling posterior predictive distribution")
         posterior_prediction = pm.sample_posterior_predictive(
-            posterior, 
+            posterior,
             random_seed=seed,
         )
 

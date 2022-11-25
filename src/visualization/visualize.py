@@ -28,54 +28,37 @@ def main(
     data = gpd.read_file(data_fp / "spatial_income_1880.gpkg")
     water = gpd.read_file(data_fp / "water_1913.gpkg")
 
-    model_1_dir = model_fp / "model_1"
-    prior_1 = az.InferenceData.from_netcdf(model_1_dir / "prior")
-    posterior_1 = az.InferenceData.from_netcdf(model_1_dir / "posterior")
-    posterior_prediction_1 = az.InferenceData.from_netcdf(
-        model_1_dir / "posterior_prediction"
-    )
-
-    model_2_dir = model_fp / "model_2"
-    prior_2 = az.InferenceData.from_netcdf(model_2_dir / "prior")
-    posterior_2 = az.InferenceData.from_netcdf(model_2_dir / "posterior")
-    posterior_prediction_2 = az.InferenceData.from_netcdf(
-        model_2_dir / "posterior_prediction"
+    prior = az.InferenceData.from_netcdf(model_fp / "prior")
+    posterior = az.InferenceData.from_netcdf(model_fp / "posterior")
+    posterior_prediction = az.InferenceData.from_netcdf(
+        model_fp / "posterior_prediction"
     )
 
     logger.info("Saving posterior predictive checks")
-    ppc_1 = az.plot_ppc(
-        posterior_prediction_1,
+    ppc = az.plot_ppc(
+        posterior_prediction,
         legend=False,
-        num_pp_samples=1000,
     )
     plt.legend(loc="upper right")
     plt.tight_layout()
-    plt.savefig(figure_fp / "model_1_posterior_predictive_check.png", dpi=300)
-    ppc_2 = az.plot_ppc(
-        posterior_prediction_2,
-        legend=False,
-        num_pp_samples=1000,
-    )
-    plt.legend(loc="upper right")
-    plt.tight_layout()
-    plt.savefig(figure_fp / "model_2_posterior_predictive_check.png", dpi=300)
+    plt.savefig(figure_fp / "posterior_predictive_check.png", dpi=300)
 
-    logger.info("Plotting posterior distributions")
-    az.plot_posterior(posterior_2, var_names="β_O", grid=(12, 3), figsize=(12, 36))
-    plt.savefig(figure_fp / "model_2_posterior", dpi=300)
+    logger.info("Plotting posterior distribution")
+    az.plot_posterior(posterior, var_names="β", grid=(12, 2), figsize=(12, 36))
+    plt.savefig(figure_fp / "posterior", dpi=300)
 
     logger.info("Plotting trace plot")
-    az.plot_trace(posterior_2)
+    az.plot_trace(posterior)
     plt.tight_layout()
-    plt.savefig(figure_fp / "model_2_trace.png", dpi=300)
+    plt.savefig(figure_fp / "model_trace.png", dpi=300)
 
     logger.info("Plotting forest plot of the posterior")
-    az.plot_forest(posterior_2, combined=True, hdi_prob=0.95)
+    az.plot_forest(posterior, combined=True, hdi_prob=0.95)
     plt.tight_layout()
-    plt.savefig(figure_fp / "model_2_forest_plot", dpi=300)
+    plt.savefig(figure_fp / "model_forest_plot", dpi=300)
 
     logger.info("Saving summary data for model")
-    posterior_summary = az.summary(posterior_2, hdi_prob=0.95)
+    posterior_summary = az.summary(posterior, hdi_prob=0.95)
     posterior_summary.to_csv(figure_fp / "posterior_summary.csv")
 
     logger.info("Plotting a map of clusters")

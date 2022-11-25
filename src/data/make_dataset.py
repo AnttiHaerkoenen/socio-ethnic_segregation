@@ -45,9 +45,15 @@ def main(input_filepath, output_filepath):
         inplace=True,
     )
 
-    data = data.drop(
-        index=data.query("(population < 5) | (district == 'Pietarin_esikaupunki')"
-        ).index).dropna().reset_index()
+    data = (
+        data.drop(
+            index=data.query(
+                "(population < 5) | (district == 'Pietarin_esikaupunki')"
+            ).index
+        )
+        .dropna()
+        .reset_index()
+    )
     logger.info("Dropped plots with lowest density and whole St. Petersburg suburb")
 
     logger.info(f"Saving data to {plot_output_fp}")

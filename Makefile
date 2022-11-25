@@ -28,7 +28,8 @@ requirements: test_environment
 data:
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
 	cp data/raw/income_tax_record_1880.csv data/interim/
-	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed --n_clusters 12 --seed 42
+	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed \
+	--n_clusters 12 --seed 42
 	cp data/interim/water_1913.gpkg data/processed/
 
 ## Delete all compiled Python files
@@ -56,7 +57,8 @@ test_environment:
 
 ## Train models
 train:
-	$(PYTHON_INTERPRETER) src/models/train_model.py data/processed models reports/figures --seed 42
+	$(PYTHON_INTERPRETER) src/models/train_model.py data/processed models reports/figures \
+	--seed 42 --prior_samples 100 --draws 1000 --tune 1000 --target_accept 0.95
 
 ## Save requirements to file
 save:
@@ -67,13 +69,9 @@ delete:
 	conda deactivate
 	conda env remove -n $(PROJECT_NAME)
 
-./reports/figures/model_1.svg: train
-./reports/figures/model_2.svg: train
-
 ## Draw figures for reporting
-figures: ./reports/figures/model_1.svg ./reports/figures/model_2.svg
-	rsvg-convert ./reports/figures/model_1.svg -f png -o ./reports/figures/model_1.png -d 600 -p 600
-	rsvg-convert ./reports/figures/model_2.svg -f png -o ./reports/figures/model_2.png -d 600 -p 600
+figures: ./reports/figures/plate_diagram.svg
+	rsvg-convert ./reports/figures/plate_diagram.svg -f png -o ./reports/figures/plate_diagram.png -d 600 -p 600
 	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
 	$(PYTHON_INTERPRETER) src/visualization/flowchart.py reports/figures
 	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 60
