@@ -70,8 +70,8 @@ def main(
     logger.info("orthodox_proportion created")
 
     data["orthodox_proportion_ln"] = data.orthodox_proportion.apply(np.log)
-    data.loc[np.isneginf(data.orthodox_proportion_ln), "orthodox_proportion_ln"] = None
-    logger.info("orthodox_proportion_ln created")
+    data = data.drop(index=data[np.isneginf(data.orthodox_proportion_ln)].index).reset_index()
+    logger.info("orthodox_proportion_ln created, negative infinities removed")
 
     data["income_per_capita"] = data.total_income / data.population
     logger.info("income_per_capita created")

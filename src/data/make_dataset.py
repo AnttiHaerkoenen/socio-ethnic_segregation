@@ -34,6 +34,8 @@ def main(input_filepath, output_filepath):
     assert data.crs == old_areas.crs == water.crs == "epsg:3067"
 
     data["is_old"] = data.geometry.within(old_areas.unary_union)
+    logger.debug("data.is_old created")
+
     data.rename(
         columns={
             "lutheran_density": "lutheran",
@@ -42,6 +44,12 @@ def main(input_filepath, output_filepath):
         },
         inplace=True,
     )
+
+    data = data.drop(
+        index=data.query("(population < 5) | (district == 'Pietarin_esikaupunki')"
+        ).index).dropna().reset_index()
+    logger.info("Dropped plots with lowest density and whole St. Petersburg suburb")
+
     logger.info(f"Saving data to {plot_output_fp}")
     data.to_file(plot_output_fp)
     water.to_file(water_output_fp)
