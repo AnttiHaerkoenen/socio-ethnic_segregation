@@ -6,29 +6,14 @@ import click
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-from sklearn.cluster import KMeans
 
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path(exists=True))
-@click.option(
-    "--n_clusters",
-    default=10,
-    type=click.IntRange(5, 25),
-    help="Number of clusters",
-)
-@click.option(
-    "--seed",
-    default=42,
-    type=click.IntRange(0, 1000),
-    help="Seed for pseudorandom elements",
-)
 def main(
     input_filepath,
     output_filepath,
-    n_clusters,
-    seed,
 ):
     """Runs data processing scripts to turn interim data from (../interim) into
     cleaned data ready to be analyzed (saved in ../processed).
@@ -80,11 +65,6 @@ def main(
 
     data["income_per_capita_ln"] = data.total_income_ln - data.population_ln
     logger.info("income_per_capita_ln created")
-
-    xy = np.array([data.geometry.x, data.geometry.y]).T
-    groups = KMeans(n_clusters=n_clusters, random_state=seed).fit_predict(xy)
-    data["group"] = groups
-    logger.info(f"data divided into {n_clusters} clusters")
 
     logger.info(f"Saving data to {plot_output_fp}")
     data.to_file(plot_output_fp)

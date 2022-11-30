@@ -26,10 +26,10 @@ requirements: test_environment
 
 ## Make Dataset
 data:
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
+	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim \
+	--min_density 5 --districts "Valli Viipurin_esikaupunki Pietarin_esikaupunki P_Annan_kruunu"
 	cp data/raw/income_tax_record_1880.csv data/interim/
-	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed \
-	--n_clusters 12 --seed 42
+	$(PYTHON_INTERPRETER) src/features/build_features.py data/interim data/processed
 	cp data/interim/water_1913.gpkg data/processed/
 
 ## Delete all compiled Python files

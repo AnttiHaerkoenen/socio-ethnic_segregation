@@ -53,7 +53,7 @@ def main(
     plt.savefig(figure_fp / "model_trace.png", dpi=300)
 
     logger.info("Plotting forest plot of the posterior")
-    az.plot_forest(posterior, combined=True, hdi_prob=0.95)
+    az.plot_forest(posterior, combined=True, var_names=["~γ"], hdi_prob=0.95)
     plt.tight_layout()
     plt.savefig(figure_fp / "model_forest_plot", dpi=300)
 

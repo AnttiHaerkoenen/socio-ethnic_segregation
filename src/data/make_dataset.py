@@ -9,7 +9,21 @@ import geopandas as gpd
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path(exists=True))
-def main(input_filepath, output_filepath):
+@click.option(
+    "--min_density",
+    "min_density",
+    type=click.FloatRange(0, 20),
+    help="lots with population density lower than this are dropped, default 5",
+    default=5,
+)
+@click.option(
+    "--districts",
+    "districts",
+    type=click.STRING,
+    default="all",
+    help="districts kept, in format 'district1 district2', default 'all'",
+)
+def main(input_filepath, output_filepath, min_density, districts):
     """
     Runs data processing scripts to turn raw data from (../raw) into
     interim data (saved in ../interim).
@@ -33,6 +47,11 @@ def main(input_filepath, output_filepath):
     logger.info("Checking coordinates")
     assert data.crs == old_areas.crs == water.crs == "epsg:3067"
 
+    if districts.lower() == "all":
+        districts = list(data.district.unique())
+    else:
+        districts = districts.split()
+
     data["is_old"] = data.geometry.within(old_areas.unary_union)
     logger.debug("data.is_old created")
 
@@ -48,7 +67,7 @@ def main(input_filepath, output_filepath):
     data = (
         data.drop(
             index=data.query(
-                "(population < 5) | (district == 'Pietarin_esikaupunki')"
+                f"(population < {min_density}) | (district != {districts})"
             ).index
         )
         .dropna()
