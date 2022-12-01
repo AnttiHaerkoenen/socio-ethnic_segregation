@@ -36,16 +36,18 @@ def main(input_filepath, output_filepath, min_density, districts):
     plot_data_fp = input_fp / "spatial_income_1880.gpkg"
     old_areas_fp = input_fp / "old_districts.gpkg"
     water_fp = input_fp / "water_1913.gpkg"
+    churches_fp = input_fp / "churches.gpkg"
     plot_output_fp = output_fp / "spatial_income_1880.gpkg"
     water_output_fp = output_fp / "water_1913.gpkg"
+    churches_output_fp = output_fp / "churches.gpkg"
 
     logger.info(f"Reading data from {plot_data_fp}")
     data = gpd.read_file(plot_data_fp).set_crs(epsg=3067)
     water = gpd.read_file(water_fp).set_crs(epsg=3067)
     old_areas = gpd.read_file(old_areas_fp).set_crs(epsg=3067)
+    churches = gpd.read_file(churches_fp).set_crs(epsg=3067)
 
-    logger.info("Checking coordinates")
-    assert data.crs == old_areas.crs == water.crs == "epsg:3067"
+    assert data.crs == old_areas.crs == water.crs == churches.crs == "epsg:3067", ValueError("mismatching coordinate types")
 
     if districts.lower() == "all":
         districts = list(data.district.unique())
@@ -53,7 +55,7 @@ def main(input_filepath, output_filepath, min_density, districts):
         districts = districts.split()
 
     data["is_old"] = data.geometry.within(old_areas.unary_union)
-    logger.debug("data.is_old created")
+    logger.info("data.is_old created")
 
     data.rename(
         columns={
@@ -73,11 +75,12 @@ def main(input_filepath, output_filepath, min_density, districts):
         .dropna()
         .reset_index()
     )
-    logger.info("Dropped plots with lowest density and whole St. Petersburg suburb")
+    logger.info(f"Dropped plots with lowest density and selected districts not in {districts}")
 
     logger.info(f"Saving data to {plot_output_fp}")
     data.to_file(plot_output_fp)
     water.to_file(water_output_fp)
+    churches.to_file(churches_output_fp)
 
 
 if __name__ == "__main__":

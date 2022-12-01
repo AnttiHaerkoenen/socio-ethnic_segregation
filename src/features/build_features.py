@@ -6,6 +6,7 @@ import click
 import numpy as np
 import geopandas as gpd
 import pandas as pd
+from scipy.spatial import distance_matrix
 
 
 @click.command()
@@ -29,8 +30,12 @@ def main(
     income_data_fp = input_fp / "income_tax_record_1880.csv"
     income_output_fp = output_fp / "income_tax_record_1880.csv"
 
-    logger.info(f"Reading data from {plot_data_fp}")
-    data = gpd.read_file(plot_data_fp).set_crs(epsg=3067)
+    churches_data_fp = input_fp / "churches.gpkg"
+    churches_output_fp = output_fp / "churches.gpkg"
+
+    logger.info(f"Reading data from {plot_data_fp} and {churches_data_fp}")
+    data = gpd.read_file(plot_data_fp)
+    churches = gpd.read_file(churches_data_fp)
 
     for col in [
         "total_income",
@@ -65,6 +70,13 @@ def main(
 
     data["income_per_capita_ln"] = data.total_income_ln - data.population_ln
     logger.info("income_per_capita_ln created")
+
+    distances = distance_matrix(
+        pd.DataFrame({"x": data.geometry.x, "y": data.geometry.y}),
+        pd.DataFrame({"x": churches.geometry.x, "y": churches.geometry.y}),
+    )
+    data["distance_from_orthodox_church"] = distances.min(axis=1).round()
+    logger.info("distance_from_orthodox_church created")
 
     logger.info(f"Saving data to {plot_output_fp}")
     data.to_file(plot_output_fp)
