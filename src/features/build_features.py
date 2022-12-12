@@ -37,6 +37,9 @@ def main(
     data = gpd.read_file(plot_data_fp)
     churches = gpd.read_file(churches_data_fp)
 
+    data["group"] = data.district.factorize()[0]
+    logger.info("grouping based on district created")
+
     for col in [
         "total_income",
         "estate_income",

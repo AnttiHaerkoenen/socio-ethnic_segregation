@@ -81,16 +81,20 @@ def main(
     with pm.Model() as model:
         idx = data.group
         W = pm.MutableData("W", data.total_income_ln)
-        θ = pm.Normal("θ", [0, 0], [0.1, 0.1], shape=2)
+        C = pm.MutableData("C", data.distance_from_orthodox_church) / 1000
+
+        θ = pm.Normal("θ", [0, 0, 0], [0.1, 0.1, 0.1], shape=3)
         β = pm.MvNormal(
-            "β", mu=θ, cov=np.diagflat(np.array([0.01, 0.01])), shape=(N_CLUSTERS, 2)
+            "β", mu=θ, cov=np.diagflat(np.array([0.1, 0.1, 0.1])), shape=(N_CLUSTERS, 3)
         )
-        η2 = pm.Exponential("η²", 1)
-        ρ2 = pm.Exponential("ρ²", 1)
+
+        η2 = pm.Normal("η²", 1, 0.1)
+        ρ2 = pm.Normal("ρ²", 20, 5)
         K = η2 * at.exp(-ρ2 * at.power(d, 2)) + np.diag([0.01] * N)
         γ = pm.MvNormal("γ", mu=np.zeros(N), cov=K, shape=N)
-        μ = β[idx, 0] + β[idx, 1] * W + γ
-        σ = pm.HalfNormal("σ", 0.01)
+
+        μ = β[idx, 0] + β[idx, 1] * W + β[idx, 2] * C + γ
+        σ = pm.Exponential("σ", 10)
         O = pm.Normal("O", mu=μ, sigma=σ, observed=O_norm)
         logger.info(f"Drawing {prior_samples} samples from prior distribution")
         prior = pm.sample_prior_predictive(samples=prior_samples, random_seed=seed)
