@@ -96,11 +96,11 @@ def main(
         μ = β[idx, 0] + β[idx, 1] * W + β[idx, 2] * C + γ
         σ = pm.Exponential("σ", 10)
         O = pm.Normal("O", mu=μ, sigma=σ, observed=O_norm)
+
         logger.info(f"Drawing {prior_samples} samples from prior distribution")
         prior = pm.sample_prior_predictive(samples=prior_samples, random_seed=seed)
         logger.info(
-            f"Drawing {draws} samples from posterior distribution with {tune} tuning samples,\
-                 target_accept={target_accept}"
+            f"Drawing {draws} samples from posterior distribution with {tune} tuning samples, target_accept={target_accept}"
         )
         posterior = pm.sample(
             draws=draws,
@@ -125,9 +125,9 @@ def main(
     logger.info("Model saved")
 
     logger.info("Saving model as plate diagram")
-    graph_2 = pm.model_to_graphviz(model)
-    graph_2.format = "svg"
-    graph_2.render(figure_fp / "plate_diagram")
+    graph = pm.model_to_graphviz(model)
+    graph.format = "svg"
+    graph.render(figure_fp / "plate_diagram")
     logger.info("Plate diagram saved")
 
 

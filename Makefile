@@ -96,7 +96,7 @@ figures: ./reports/figures/plate_diagram.svg
 # 	* replace newline plus comments by `---`
 # 	* print line
 # Separate expressions are necessary because labels cannot be delimited by
-# semicolon; see <http://stackoverflow.com/a/11799865/1968>
+# semicolon; see <http://stackoverflow.com/a/11799865/1968> 
 .PHONY: help
 help:
 	@echo "$$(tput bold)Available rules:$$(tput sgr0)"
