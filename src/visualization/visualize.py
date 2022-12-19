@@ -44,7 +44,7 @@ def main(
     plt.savefig(figure_fp / "posterior_predictive_check.png", dpi=300)
 
     logger.info("Plotting posterior distribution")
-    az.plot_posterior(posterior, var_names="β", grid=(12, 2), figsize=(12, 36))
+    az.plot_posterior(posterior, var_names=["β", "θ"], grid=(5, 3), figsize=(12, 12))
     plt.savefig(figure_fp / "posterior", dpi=300)
 
     logger.info("Plotting trace plot")
@@ -60,39 +60,6 @@ def main(
     logger.info("Saving summary data for model")
     posterior_summary = az.summary(posterior, hdi_prob=0.95)
     posterior_summary.to_csv(figure_fp / "posterior_summary.csv")
-
-    logger.info("Plotting a map of clusters")
-    cluster_colors = plt.get_cmap("tab20")
-    fig, ax = plt.subplots(figsize=(12, 10))
-    data.plot(
-        ax=ax,
-        column="group",
-        categorical=True,
-        cmap=cluster_colors,
-        markersize=25,
-        edgecolor="black",
-        alpha=0.8,
-        legend=True,
-        legend_kwds={
-            "title": "Clusters",
-            "loc": "lower left",
-            "frameon": True,
-            "framealpha": 1,
-            "edgecolor": "black",
-        },
-    )
-    offset = 100
-    x_min, y_min, x_max, y_max = data.total_bounds
-    water.plot(
-        ax=ax,
-        color="#1fb9db",
-    )
-    ax.set_ylim(y_min - offset, y_max + offset)
-    ax.set_xlim(x_min - offset, x_max + offset)
-    plt.xticks([])
-    plt.yticks([])
-    fig.tight_layout()
-    plt.savefig(figure_fp / "cluster_map.png", dpi=300)
 
 
 if __name__ == "__main__":

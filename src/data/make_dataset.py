@@ -75,7 +75,7 @@ def main(input_filepath, output_filepath, min_density, districts):
         .dropna()
         .reset_index()
     )
-    logger.info(f"Dropped plots with lowest density and selected districts not in {districts}")
+    logger.info(f"Dropped plots with lowest density and districts not in {districts}")
 
     logger.info(f"Saving data to {plot_output_fp}")
     data.to_file(plot_output_fp)

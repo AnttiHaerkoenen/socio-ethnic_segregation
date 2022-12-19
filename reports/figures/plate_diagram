@@ -1,18 +1,18 @@
 digraph {
-	subgraph cluster550 {
-		"γ" [label="γ
-~
-MvNormal" shape=ellipse]
-		W [label="W
-~
-MutableData" shape=box style="rounded, filled"]
+	subgraph cluster540 {
 		C [label="C
 ~
 MutableData" shape=box style="rounded, filled"]
+		W [label="W
+~
+MutableData" shape=box style="rounded, filled"]
+		"γ" [label="γ
+~
+MvNormal" shape=ellipse]
 		O [label="O
 ~
 Normal" shape=ellipse style=filled]
-		label=550 labeljust=r labelloc=b style=rounded
+		label=540 labeljust=r labelloc=b style=rounded
 	}
 	subgraph cluster3 {
 		"θ" [label="θ
@@ -26,21 +26,21 @@ Normal" shape=ellipse]
 MvNormal" shape=ellipse]
 		label="4 x 3" labeljust=r labelloc=b style=rounded
 	}
+	"η²" [label="η²
+~
+Normal" shape=ellipse]
 	"ρ²" [label="ρ²
 ~
 Normal" shape=ellipse]
 	"σ" [label="σ
 ~
-Exponential" shape=ellipse]
-	"η²" [label="η²
-~
-Normal" shape=ellipse]
+HalfNormal" shape=ellipse]
 	"θ" -> "β"
-	"ρ²" -> "γ"
 	"η²" -> "γ"
+	"ρ²" -> "γ"
+	"γ" -> O
 	C -> O
+	"β" -> O
 	W -> O
 	"σ" -> O
-	"γ" -> O
-	"β" -> O
 }

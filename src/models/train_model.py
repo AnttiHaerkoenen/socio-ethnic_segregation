@@ -64,6 +64,7 @@ def main(
 
     logger.info("Preparing data")
     data = gpd.read_file(data_fp / "spatial_income_1880.gpkg")
+    data = data.loc[data.is_old]
     N_CLUSTERS = len(data.group.unique())
     N = data.shape[0]
     O_norm = (
@@ -89,12 +90,12 @@ def main(
         )
 
         η2 = pm.Normal("η²", 1, 0.1)
-        ρ2 = pm.Normal("ρ²", 20, 5)
-        K = η2 * at.exp(-ρ2 * at.power(d, 2)) + np.diag([0.01] * N)
+        ρ2_std = pm.Normal("ρ²", 1, 0.1) # standardized by 20
+        K = η2 * at.exp(-20 * ρ2_std * at.power(d, 2)) + np.diag([0.01] * N)
         γ = pm.MvNormal("γ", mu=np.zeros(N), cov=K, shape=N)
 
         μ = β[idx, 0] + β[idx, 1] * W + β[idx, 2] * C + γ
-        σ = pm.Exponential("σ", 10)
+        σ = pm.HalfNormal("σ", 0.1)
         O = pm.Normal("O", mu=μ, sigma=σ, observed=O_norm)
 
         logger.info(f"Drawing {prior_samples} samples from prior distribution")

@@ -31,7 +31,6 @@ def main(
     income_output_fp = output_fp / "income_tax_record_1880.csv"
 
     churches_data_fp = input_fp / "churches.gpkg"
-    churches_output_fp = output_fp / "churches.gpkg"
 
     logger.info(f"Reading data from {plot_data_fp} and {churches_data_fp}")
     data = gpd.read_file(plot_data_fp)

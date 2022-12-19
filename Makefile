@@ -73,8 +73,6 @@ delete:
 figures: ./reports/figures/plate_diagram.svg
 	rsvg-convert ./reports/figures/plate_diagram.svg -f png -o ./reports/figures/plate_diagram.png -d 600 -p 600
 	$(PYTHON_INTERPRETER) src/visualization/visualize.py data/processed models reports/figures
-	$(PYTHON_INTERPRETER) src/visualization/flowchart.py reports/figures
-	rsvg-convert ./reports/figures/flowchart.svg -f png -o ./reports/figures/flowchart.png -d 600 -p 60
 
 #################################################################################
 # Self Documenting Commands                                                     #
