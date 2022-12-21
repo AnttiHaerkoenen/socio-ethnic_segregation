@@ -65,6 +65,7 @@ def main(
     logger.info("Preparing data")
     data = gpd.read_file(data_fp / "spatial_income_1880.gpkg")
     data = data.loc[data.is_old]
+    data['distance_from_church_km'] = data['distance_from_orthodox_church'] / 1000
     N_CLUSTERS = len(data.group.unique())
     N = data.shape[0]
     O_norm = (
@@ -72,7 +73,6 @@ def main(
         .fit_transform(data.orthodox_proportion_ln.values.reshape(-1, 1))
         .flatten()
     )
-
     logger.info("Calculating distance matrix")
     xy = pd.DataFrame({"x": data.geometry.x, "y": data.geometry.y, "group": data.group})
     d = distance_matrix(xy, xy)
@@ -81,22 +81,19 @@ def main(
 
     with pm.Model() as model:
         idx = data.group
-        W = pm.MutableData("W", data.total_income_ln)
-        C = pm.MutableData("C", data.distance_from_orthodox_church) / 1000
+        W = pm.ConstantData("W", data.total_income_ln)
+        C = pm.ConstantData("C", data.distance_from_church_km)
 
         θ = pm.Normal("θ", [0, 0, 0], [0.1, 0.1, 0.1], shape=3)
         β = pm.MvNormal(
             "β", mu=θ, cov=np.diagflat(np.array([0.1, 0.1, 0.1])), shape=(N_CLUSTERS, 3)
         )
 
-        η2 = pm.Normal("η²", 1, 0.1)
-        ρ2_std = pm.Normal("ρ²", 1, 0.1) # standardized by 20
-        K = η2 * at.exp(-20 * ρ2_std * at.power(d, 2)) + np.diag([0.01] * N)
-        γ = pm.MvNormal("γ", mu=np.zeros(N), cov=K, shape=N)
-
-        μ = β[idx, 0] + β[idx, 1] * W + β[idx, 2] * C + γ
-        σ = pm.HalfNormal("σ", 0.1)
-        O = pm.Normal("O", mu=μ, sigma=σ, observed=O_norm)
+        η2 = pm.Normal("η²", 1, 0.05)
+        ρ2_std = pm.Normal("ρ²", 1, 0.1) # scaled by 75
+        K = η2 * at.exp(-75 * ρ2_std * at.power(d, 2)) + np.diag([0.01] * N)
+        μ = β[idx, 0] + β[idx, 1] * W + β[idx, 2] * C
+        O = pm.MvNormal("O", mu=μ, cov=K, shape=N, observed=O_norm)
 
         logger.info(f"Drawing {prior_samples} samples from prior distribution")
         prior = pm.sample_prior_predictive(samples=prior_samples, random_seed=seed)
