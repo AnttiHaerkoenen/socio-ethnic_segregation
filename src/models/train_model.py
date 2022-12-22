@@ -89,8 +89,8 @@ def main(
             "β", mu=θ, cov=np.diagflat(np.array([0.1, 0.1, 0.1])), shape=(N_CLUSTERS, 3)
         )
 
-        η2 = pm.Normal("η²", 1, 0.05)
-        ρ2_std = pm.Normal("ρ²", 1, 0.1) # scaled by 75
+        η2 = pm.Normal("η²", 1, 0.2)
+        ρ2_std = pm.Normal("ρ²_std", 1, 0.2) # scaled by 75
         K = η2 * at.exp(-75 * ρ2_std * at.power(d, 2)) + np.diag([0.01] * N)
         μ = β[idx, 0] + β[idx, 1] * W + β[idx, 2] * C
         O = pm.MvNormal("O", mu=μ, cov=K, shape=N, observed=O_norm)

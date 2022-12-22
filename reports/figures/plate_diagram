@@ -1,17 +1,14 @@
 digraph {
 	subgraph cluster540 {
-		W [label="W
-~
-MutableData" shape=box style="rounded, filled"]
-		O [label="O
-~
-Normal" shape=ellipse style=filled]
 		C [label="C
 ~
-MutableData" shape=box style="rounded, filled"]
-		"γ" [label="γ
+ConstantData" shape=box style="rounded, filled"]
+		W [label="W
 ~
-MvNormal" shape=ellipse]
+ConstantData" shape=box style="rounded, filled"]
+		O [label="O
+~
+MvNormal" shape=ellipse style=filled]
 		label=540 labeljust=r labelloc=b style=rounded
 	}
 	subgraph cluster3 {
@@ -32,15 +29,10 @@ Normal" shape=ellipse]
 	"ρ²" [label="ρ²
 ~
 Normal" shape=ellipse]
-	"σ" [label="σ
-~
-Normal" shape=ellipse]
 	"θ" -> "β"
-	"η²" -> "γ"
-	"ρ²" -> "γ"
-	"σ" -> O
-	W -> O
+	"ρ²" -> O
 	C -> O
+	"η²" -> O
 	"β" -> O
-	"γ" -> O
+	W -> O
 }
