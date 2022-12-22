@@ -34,17 +34,13 @@ def main(
         model_fp / "posterior_prediction"
     )
 
-    logger.info("Saving posterior predictive checks")
-    ppc = az.plot_ppc(
-        posterior_prediction,
-        legend=False,
-    )
-    plt.legend(loc="upper right")
-    plt.tight_layout()
-    plt.savefig(figure_fp / "posterior_predictive_check.png", dpi=300)
-
     logger.info("Plotting posterior distribution")
-    az.plot_posterior(posterior, var_names=["β", "θ"], grid=(5, 3), figsize=(12, 12))
+    az.plot_posterior(
+        posterior, 
+        var_names=["θ", "β"], 
+        grid=(5, 3), 
+        # figsize=(16, 24),
+    )
     plt.savefig(figure_fp / "posterior", dpi=300)
 
     logger.info("Plotting trace plot")
@@ -53,13 +49,22 @@ def main(
     plt.savefig(figure_fp / "model_trace.png", dpi=300)
 
     logger.info("Plotting forest plot of the posterior")
-    az.plot_forest(posterior, combined=True, var_names=["~γ"], hdi_prob=0.95)
+    az.plot_forest(posterior, combined=True, hdi_prob=0.95)
     plt.tight_layout()
     plt.savefig(figure_fp / "model_forest_plot", dpi=300)
 
     logger.info("Saving summary data for model")
     posterior_summary = az.summary(posterior, hdi_prob=0.95)
     posterior_summary.to_csv(figure_fp / "posterior_summary.csv")
+
+    logger.info("Saving posterior predictive checks")
+    ppc = az.plot_ppc(
+        posterior_prediction,
+        legend=False,
+    )
+    plt.legend(loc="upper right")
+    plt.tight_layout()
+    plt.savefig(figure_fp / "posterior_predictive_check.png", dpi=300)
 
 
 if __name__ == "__main__":
