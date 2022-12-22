@@ -41,6 +41,7 @@ def main(
         grid=(5, 3), 
         # figsize=(16, 24),
     )
+    plt.tight_layout()
     plt.savefig(figure_fp / "posterior", dpi=300)
 
     logger.info("Plotting trace plot")
