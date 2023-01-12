@@ -37,9 +37,9 @@ def main(
     logger.info("Plotting posterior distribution")
     az.plot_posterior(
         posterior, 
-        var_names=["θ", "β"], 
-        grid=(5, 3), 
-        # figsize=(16, 24),
+        var_names=["β"],
+        grid=(4, 3),
+        figsize=(12, 16.5),
     )
     plt.tight_layout()
     plt.savefig(figure_fp / "posterior", dpi=300)
